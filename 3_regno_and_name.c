@@ -1,4 +1,4 @@
-// To write a program that requests a user to enter their RegNo, name and save them to a file.
+// To write a program that requests a user to enter his/her regno and name and saves to a file.
 
 #include <stdio.h>
 #include <string.h>
