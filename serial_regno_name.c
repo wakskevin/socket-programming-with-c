@@ -5,6 +5,7 @@
 
 int main()
 {
+    int serial;
     char regno[20];
     char fname[15];
     char lname[15];
@@ -16,6 +17,8 @@ int main()
     while (trial <= 3)
     {
         puts("*************************************");
+        printf("Your serial number? ");
+        scanf("%d", &serial);
         printf("Your registration number? ");
         scanf("%s", regno);
         printf("Your first name? ");
@@ -24,28 +27,28 @@ int main()
         scanf("%s", lname);
 
         putchar('\n');
-        printf("You are %s %s of registration %s.\n", fname, lname, regno);
+        printf("You are %s %s of registration %s. Your serial number is %d\n", fname, lname, regno, serial);
         printf("Is this correct? (type 'yes' or 'no'): ");
         scanf("%s", confirm);
 
         if (strcmp(confirm, "yes") == 0)
         {
             // Open the file
-            fh = fopen("3_regno_and_name.txt", "a");
+            fh = fopen("serial_regno_name.txt", "a");
             if (fh == NULL)
             {
-                puts("Failed to create file 3_regno_and_name.txt");
+                puts("Failed to create file serial_regno_name.txt");
                 return (1);
             }
             else
             {
                 if (ftell(fh) == 0) // start writing at the begining of the file
                 {
-                    fprintf(fh, "%s %s %s", regno, fname, lname);
+                    fprintf(fh, "%d %s %s %s", serial, regno, fname, lname);
                 }
                 else // go to the next line and start writing from there
                 {
-                    fprintf(fh, "\n%s %s %s", regno, fname, lname);
+                    fprintf(fh, "\n%d %s %s %s", serial, regno, fname, lname);
                 }
                 puts("Record added to file ✅");
                 // Close the file

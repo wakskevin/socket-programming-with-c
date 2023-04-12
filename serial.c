@@ -1,11 +1,11 @@
-// a program that requests a user to enter his/her regno and saves it to a file.
+// a program that requests a user to enter his/her serial no. and saves it to a file.
 
 #include <stdio.h>
 #include <string.h>
 
 int main()
 {
-    char regno[20];
+    int serial;
     char confirm[5];
     int trial = 1;
 
@@ -14,32 +14,32 @@ int main()
     while (trial <= 3)
     {
         puts("*************************************");
-        printf("Your registration number? ");
-        scanf("%s", regno);
+        printf("Your serial number? ");
+        scanf("%d", &serial);        
 
         putchar('\n');
-        printf("Your registration number is %s\n", regno);
+        printf("Your serial number is %d\n", serial);
         printf("Is this correct? (type 'yes' or 'no'): ");
         scanf("%s", confirm);
 
         if (strcmp(confirm, "yes") == 0)
         {
             // Open the file
-            fh = fopen("1_regno.txt", "a");
+            fh = fopen("serial.txt", "a");
             if (fh == NULL)
             {
-                puts("Failed to create file 1_regno.txt");
+                puts("Failed to create file serial.txt");
                 return (1);
             }
             else
             {
                 if (ftell(fh) == 0) // start writing at the begining of the file
                 {
-                    fprintf(fh, "%s", regno);
+                    fprintf(fh, "%d", serial);
                 }
                 else // go to the next line and start writing from there
                 {
-                    fprintf(fh, "\n%s", regno);
+                    fprintf(fh, "\n%d", serial);
                 }
                 puts("Record added to file ✅");
                 // Close the file
