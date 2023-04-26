@@ -17,8 +17,8 @@ int main()
     struct addrinfo hints, *server;
 
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;			/* IPv4 connection */
-    hints.ai_socktype = SOCK_STREAM;	/* TCP, streaming */
+    hints.ai_family = AF_INET;       /* IPv4 connection */
+    hints.ai_socktype = SOCK_STREAM; /* TCP, streaming */
 
     const int buffer_size = 1024;
     char send_buffer[buffer_size];
@@ -34,7 +34,7 @@ int main()
     }
 
     // configure address of the server to which the information will be sent
-    r = getaddrinfo("127.0.0.1", "8880", &hints, &server);
+    r = getaddrinfo("127.0.0.1", "8888", &hints, &server);
     if (r != 0)
     {
         perror("Failed to configure server address\n\n");
@@ -62,6 +62,7 @@ int main()
     while ((c = fgetc(fh)) != EOF)
     {
         send_buffer[buffer_len++] = c;
+        printf("%s", send_buffer);
     }
 
     r = send(sockfd, send_buffer, buffer_size, 0);
@@ -85,6 +86,7 @@ int main()
     }
 
     // close
+    fclose(fh);
     freeaddrinfo(server);
     close(sockfd);
 
@@ -129,8 +131,6 @@ int get_student_details()
                     fprintf(fh, "\n%d", serial);
                 }
                 puts("Record added to file ✅");
-                // Close the file
-                fclose(fh);
                 break;
             }
         }

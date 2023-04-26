@@ -23,7 +23,7 @@ int main()
 
 
 	// configure address of this server
-	r = getaddrinfo("127.0.0.1", "8880", &hints, &server);
+	r = getaddrinfo("127.0.0.1", "8888", &hints, &server);
 	if (r != 0)
 	{
 		perror("Failed to configure server address\n\n");
@@ -67,6 +67,7 @@ int main()
 	if (r > 0)
 	{
 		buffer[r] = '\0'; /* terminate the incoming string */
+		printf("%s", buffer);
 		send(clientfd, acknowledgement, strlen(acknowledgement), 0);
 		send(clientfd, buffer, strlen(buffer), 0);
 	}
