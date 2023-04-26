@@ -11,5 +11,5 @@ roughwork/
 3_serial_regno_name/serial_regno_name.txt
 
 test*
-client*
-server*
+client
+server
