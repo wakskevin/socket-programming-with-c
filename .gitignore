@@ -1,15 +1,25 @@
 .vscode
 ~roughwork/
 
-1_serial/serial
-1_serial/serial.txt
+Iterative_Connection_Oriented/tcp_client
+Iterative_Connection_Oriented/tcp_server
+Iterative_Connection_Oriented/student_details*
+Iterative_Connectionless/udp_client
+Iterative_Connectionless/udp_server
+Iterative_Connectionless/student_details*
 
-2_serial_regno/serial_regno
-2_serial_regno/serial_regno.txt
-
-3_serial_regno_name/serial_regno_name
-3_serial_regno_name/serial_regno_name.txt
+Concurrent_Connection_Oriented/tcp_client1
+Concurrent_Connection_Oriented/tcp_client2
+Concurrent_Connection_Oriented/tcp_client3
+Concurrent_Connection_Oriented/tcp_server
+Concurrent_Connection_Oriented/student_details*
+Concurrent_Connectionless/udp_client
+Concurrent_Connectionless/udp_client1
+Concurrent_Connectionless/udp_client2
+Concurrent_Connectionless/udp_client3
+Concurrent_Connectionless/udp_server
+Concurrent_Connectionless/student_details*
 
 test*
-client
-server
+client*
+server*
