@@ -91,7 +91,7 @@ int main()
         printf("Received %d bytes of data from the Client\n", r);
     }
 
-    // TODO: /* *********************** process user input *********************** */
+    /* *********************** process user input *********************** */
 
     r = savetofile(recv_buffer);
     if (r == -1)
@@ -105,15 +105,18 @@ int main()
     }
 
     // TODO: /* *********************** formulate response *********************** */
-    /*
-    if there's some error eg duplicate record
-        send_buffer = "The appropriate message";
-    else is everything is okay
-        send_buffer = "The details have been received, processed and saved";
+
+    /**
+      * if there's some error eg duplicate record
+      *     send_buffer = "The appropriate message";
+      * else if everything is okay
+      *     send_buffer = "User details received and saved successfully";
     */
 
+    send_buffer = "User details received and saved successfully";
+
     /* *********************** send response back to the client *********************** */
- 
+
     r = send(newsockfd, send_buffer, strlen(send_buffer), 0);
     if (r < 1)
     {
