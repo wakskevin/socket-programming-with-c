@@ -19,7 +19,7 @@ int main()
     hints.ai_family = AF_INET;       // IPv4 connection
     hints.ai_socktype = SOCK_STREAM; // TCP, streaming
 
-    r = getaddrinfo("127.0.0.1", "8070", &hints, &server);
+    r = getaddrinfo("127.0.0.1", "8009", &hints, &server);
 
     if (r != 0)
     {
@@ -127,6 +127,8 @@ int getuserinput(char buffer[BUFSIZ])
             strcat(buffer, "@@@"); // separator indicator
             strcat(buffer, lname);
             strcat(buffer, "$$$"); // finish with the terminator indicator
+
+            // printf("%s", buffer);
 
             putchar('\n');
             return 0;
