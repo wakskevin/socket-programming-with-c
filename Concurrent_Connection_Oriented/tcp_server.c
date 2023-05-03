@@ -84,7 +84,7 @@ int main()
         }
         else if (pid == 0) // This is the child process
         {
-            // close the parent socket
+            // close the main socket in the child process
             close(sockfd);
 
             // receive student details
@@ -101,7 +101,8 @@ int main()
                 printf("Received %d bytes of data from the Client\n", r);
             }
 
-            // save received user input to file
+            // TODO: // save received user input to file
+
             r = savetofile(recv_buffer);
             if (r == -1)
             {
@@ -113,8 +114,13 @@ int main()
                 puts("Record has been added");
             }
 
-            // send acknowledgement back to the client
+            // TODO: // formulate a response
+
             send_buffer = "User details received and saved successfully";
+
+
+            // send acknowledgement back to the client
+
             r = send(newsockfd, send_buffer, strlen(send_buffer), 0);
             if (r < 1)
             {
