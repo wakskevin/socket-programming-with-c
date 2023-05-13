@@ -5,13 +5,32 @@
 #include <netdb.h>
 #include <unistd.h>
 
-int savetofile(char buffer[BUFSIZ]); // savetofile() function prototype
+#define MAX_WORD_LENGTH 50
+
+// -------------- function prototypes
+
+int unformat_and_save(char buffer[BUFSIZ]);
+
+/**
+ * configure address details for the server
+ * socket()
+ * bind()
+ * listen()
+ * accept()
+ * recvfrom()
+ * (do stuff) - unformat_and_save() Serial@@@Regno@@@fname@@@lname$$$
+ * sendto()
+ * close()
+*/
+
 
 int main()
 {
-    int r, sockfd, newsockfd;
+    int r;
+    int sockfd;
+    int newsockfd;
     char recv_buffer[BUFSIZ];
-    char *send_buffer;
+    char send_buffer[BUFSIZ];
 
     /* *********************** configure host *********************** */
 
@@ -20,7 +39,7 @@ int main()
     hints.ai_family = AF_INET;       // IPv4 connection
     hints.ai_socktype = SOCK_STREAM; // TCP, streaming
 
-    r = getaddrinfo("127.0.0.1", "8009", &hints, &host);
+    r = getaddrinfo("127.0.0.1", "8724", &hints, &host);
     if (r != 0)
     {
         perror("Failed to configure host server address details\n\n");
@@ -50,7 +69,7 @@ int main()
 
     /* *********************** listen to incoming connections *********************** */
 
-    r = listen(sockfd, 1); // number of pending connections that can wait in the queue is 1.
+    r = listen(sockfd, 3); // number of pending connections that can wait in the queue is 3.
     if (r == -1)
     {
         perror("Failed to listen to incoming connections\n\n");
@@ -88,47 +107,38 @@ int main()
     {
         recv_buffer[r] = '\0'; // terminate the incoming string
 
-        printf("Received %d bytes of data from the Client\n", r);
+        printf("Received %s bytes of data from the Client\n", recv_buffer);
     }
+    /* *********************** process student details *********************** */
 
-    /* *********************** process user input *********************** */
+    r = unformat_and_save(recv_buffer);
 
-    r = savetofile(recv_buffer);
-    if (r == -1)
+    /* *********************** formulate response *********************** */
+    if (r == 1)
     {
-        perror("Failed to save received user data to file\n\n");
-        exit(1);
+        strcpy(send_buffer, "⛔ Could not create file student_details.csv. Exiting program...");
+    }
+    else if (r == -1)
+    {
+        strcpy(send_buffer, "⛔ Duplicate Serial no. Exiting Program...");
+    }
+    else if (r == -2)
+    {
+        strcpy(send_buffer, "⛔ Duplicate Registration no. Exiting Program...");
     }
     else
     {
-        puts("Record has been added");
+        strcpy(send_buffer, "✅ Record added successfully\n\n");
     }
 
-    // TODO: /* *********************** formulate response *********************** */
-
-    /**
-      * if there's some error eg duplicate record
-      *     send_buffer = "The appropriate message";
-      * else if everything is okay
-      *     send_buffer = "User details received and saved successfully";
-    */
-
-    send_buffer = "User details received and saved successfully";
-
-    /* *********************** send response back to the client *********************** */
+    /* *********************** send response *********************** */
 
     r = send(newsockfd, send_buffer, strlen(send_buffer), 0);
     if (r < 1)
     {
-        perror("Failed to send receipt acknowledgement message back to the client.");
+        perror("Failed to send message to client");
         exit(1);
     }
-    else
-    {
-        printf("Acknowledgement message sent to the Client\n");
-    }
-
-    /* *********************** close up *********************** */
 
     close(newsockfd);   // close socket created by accept() function
     freeaddrinfo(host); // free up allocated memory
@@ -136,10 +146,13 @@ int main()
 
     putchar('\n');
     return 0;
+
+    return 0;
 }
 
-int savetofile(char buffer[BUFSIZ])
+int unformat_and_save(char buffer[BUFSIZ])
 {
+
     char details[4][20];
     int j = 0, k = 0;
 
@@ -153,15 +166,6 @@ int savetofile(char buffer[BUFSIZ])
 
     FILE *fh;
 
-    /* *********************** Open the file *********************** */
-
-    fh = fopen("student_details.csv", "a");
-    if (fh == NULL)
-    {
-        puts("Could not create file details.csv");
-        return (-1);
-    }
-
     /**
      * format the received string removing the '@@@' separators
      * and stopping before the '$$$' terminator symbol
@@ -172,12 +176,13 @@ int savetofile(char buffer[BUFSIZ])
         if (buffer[i] == '@' && buffer[i + 1] == '@' && buffer[i + 2] == '@')
         {
             i = i + 2;
-            details[j][k] = '\0'; // strings in C end are terminated with the null character.
+            details[j][k] = '\0'; // strings in C are terminated with the null character.
             j++;
             k = 0;
         }
         else if (buffer[i] == '$' && buffer[i + 1] == '$' && buffer[i + 2] == '$')
         {
+            details[j][k] = '\0'; // strings in C are terminated with the null character.
             break;
         }
         else
@@ -187,28 +192,62 @@ int savetofile(char buffer[BUFSIZ])
         }
     }
 
-    /* *********************** writing to the file *********************** */
+    fh = fopen("student_details.csv", "a");
+    if (fh == NULL)
+    {
+        return (1);
+    }
 
+    /* *********************** writing to the file *********************** */
     switch (ftell(fh))
     {
-
-        // start writing at the begining of the csv file if empty
-
     case 0:
         fprintf(fh, "%s,%s,%s %s", details[SERIAL], details[REGNO], details[FNAME], details[LNAME]);
         break;
 
         // if the csv file already has records go to the next line and start writing from there
-
     default:
+        FILE *file;
+        char word[MAX_WORD_LENGTH];
+        char delimiter[] = ",";
+        char *token;
+
+        // Open file for reading
+        file = fopen("student_details.csv", "r");
+        if (file == NULL)
+        {
+            return (1);
+        }
+
+        while (fgets(word, MAX_WORD_LENGTH, file) != NULL) // Read file word by word
+        {
+            if (word[strlen(word) - 1] == '\n') // Replace newline character with null character
+            {
+                word[strlen(word) - 1] = '\0';
+            }
+
+            token = strtok(word, delimiter); // Split word by comma
+            while (token != NULL)
+            {
+                if (strcmp(details[SERIAL], token) == 0)
+                {
+                    return (-1);
+                }
+                else if (strcmp(details[REGNO], token) == 0)
+                {
+                    return (-2);
+                }
+                token = strtok(NULL, delimiter);
+            }
+        }
         fprintf(fh, "\n%s,%s,%s %s", details[SERIAL], details[REGNO], details[FNAME], details[LNAME]);
+        fclose(file);
         break;
     }
 
     /* *********************** Close the file *********************** */
 
     fclose(fh);
-
     putchar('\n');
     return (0);
 }

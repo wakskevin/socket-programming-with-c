@@ -5,89 +5,88 @@
 #include <netdb.h>
 #include <unistd.h>
 
-int getuserinput(char buffer[BUFSIZ]); // function prototype
+// -------------- function prototypes
+
+int getuserinput(char buffer[BUFSIZ]); // function to get user input and format based on application protocol
 
 int main()
 {
-    int r, sockfd;
+    int r;
+    int sockfd;
     char send_buffer[BUFSIZ];
     char recv_buffer[BUFSIZ];
+    struct addrinfo hints;
+    struct addrinfo *server;
 
-    // configure remote address
-    struct addrinfo hints, *server;
+    /* *********************** configure address of the server to send to *********************** */
+
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;       // IPv4 connection
-    hints.ai_socktype = SOCK_STREAM; // TCP, streaming
+    hints.ai_socktype = SOCK_DGRAM; // UDP, datagram
 
-    r = getaddrinfo("127.0.0.1", "8704", &hints, &server);
+     r = getaddrinfo("192.168.8.102", "8714", &hints, &server);
 
     if (r != 0)
     {
-        perror("Failed to configure server address details\n\n");
+        printf("⛔ Failed to configure server address details. Exiting program...\n\n");
         exit(1);
     }
 
-    // create socket to communicate with server
-    sockfd = socket(server->ai_family,
-                    server->ai_socktype,
-                    server->ai_protocol);
+    /* *********************** create the socket *********************** */
+
+    sockfd = socket(server->ai_family, server->ai_socktype, server->ai_protocol);
+
     if (sockfd == -1)
     {
-        perror("Failed to create client socket.\n\n");
+        printf("⛔ Failed to create client socket. Exiting program...\n\n");
         exit(1);
     }
 
-    // connect to the server
-    r = connect(sockfd,
-                server->ai_addr,
-                server->ai_addrlen);
-    if (r == -1)
-    {
-        perror("Client socket failed to connect to the server.\n\n");
-        exit(1);
-    }
+    /* *********************** get user input and format it *********************** */
 
-    // get user input
     r = getuserinput(send_buffer);
     if (r == -1)
     {
-        perror("Failed to get user input\n\n");
+        printf("⛔ Failed to get and format student user input. Exiting program...\n\n");
         exit(1);
     }
 
-    // send student details
-    r = send(sockfd, send_buffer, strlen(send_buffer), 0);
+    /* *********************** send to the server *********************** */
+
+    r = sendto(sockfd, send_buffer, strlen(send_buffer), 0, server->ai_addr, server->ai_addrlen);
     if (r < 1)
     {
-        perror("Failed to send mesage\n\n");
+        printf("⛔ Failed to send mesage. Exiting program...\n\n");
         exit(1);
     }
     else
     {
         puts("*************************************");
-        printf("User details sent to the Server\n");
+        printf("📤 User Input sent to the Server\n");
     }
 
-    // receive acknowledgement of receipt by the server
-    r = recv(sockfd, recv_buffer, BUFSIZ, 0);
+    /* *********************** receive response from server *********************** */
+
+    r = recvfrom(sockfd, recv_buffer, BUFSIZ, 0, server->ai_addr, &server->ai_addrlen);
     if (r < 1)
     {
-        perror("Failed! Received 0 bytes of data\n\n");
+        printf("⛔ Failed! Received 0 bytes of data. Exiting Program...\n\n");
         exit(1);
     }
     else
     {
         recv_buffer[r] = '\0';
-        printf("Received %d bytes of data from the Server: %s\n", r, recv_buffer);
+        printf("📨 Server responded with %d bytes of data:\n", r);
+        printf("%s\n", recv_buffer);
     }
 
-    // free allocated memory
-    freeaddrinfo(server);
+    /* *********************** close up *********************** */
 
-    // close the socket
-    close(sockfd);
+    freeaddrinfo(server); // free allocated memory
+    close(sockfd);        // close the socket
 
     putchar('\n');
+
     return 0;
 }
 
