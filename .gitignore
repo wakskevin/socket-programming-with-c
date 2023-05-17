@@ -1,4 +1,6 @@
 .vscode
 test*
 client
+client2
 server
+student_details*

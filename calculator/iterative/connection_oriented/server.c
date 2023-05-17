@@ -183,7 +183,7 @@ int main()
             exit(EXIT_FAILURE);
         }
 
-        printf("📤 Response sent to client %s", client);
+        printf("📤 Response sent to client %s\n", client);
 
         // close client socket
         close(newsockfd);
@@ -271,7 +271,7 @@ int is_operator(char *operator)
     }
 }
 
-int is_number(char *number)
+int is_number(char *number) 
 {
     for (int i = 0; i < strlen(number); i++)
     {

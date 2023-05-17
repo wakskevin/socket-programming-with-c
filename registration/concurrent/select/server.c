@@ -19,7 +19,6 @@ Response add_student_record(char student_details[4][20]);
 
 int main()
 {
-    // const char *port = "65001"; /* available port */
     int r;
     int sockfd, fd;
     int newsockfd;
@@ -224,7 +223,7 @@ int main()
                             exit(EXIT_FAILURE);
                         }
 
-                        puts("📤 Response sent to client");
+                        printf("📤 Response sent to client %s\n", client[fd]);
 
                         disconnect_time = time(NULL);
                         printf("✅ Client %s disconnected from the server at \033[34m%s\033[0m", client[fd], ctime(&disconnect_time));

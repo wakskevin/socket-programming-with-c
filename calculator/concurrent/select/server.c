@@ -22,7 +22,6 @@ int is_number(char *number);
 
 int main()
 {
-    // const char *port = "65001"; /* available port */
     int r;
     int sockfd, fd;
     int newsockfd;
@@ -30,8 +29,7 @@ int main()
     const int backlog = 10;
     int j, k;
 
-    char recv_buffer[BUFSIZ];
-    char send_buffer[BUFSIZ];
+    char recv_buffer[BUFSIZ], send_buffer[BUFSIZ], result[BUFSIZ];
     char expression[4][20];
     char client[backlog][BUFSIZ]; /* storage for IPv4 connections */
 
@@ -141,7 +139,7 @@ int main()
                 }
                 else // if an existing client
                 {
-                    /* ******************************** RECEIVE STUDENT DETAILS **************************** */
+                    /* ******************************** RECEIVE CALCULATION INPUT **************************** */
 
                     r = recv(fd, recv_buffer, BUFSIZ, 0);
 
@@ -162,8 +160,8 @@ int main()
                         j = 0;
                         k = 0;
 
-                        /* ************************** EXTRACT STUDENT DETAILS ***************************** */
-                        
+                        /* ************************** EXTRACT OPERANDS AND OPERATOR ***************************** */
+
                         j = 0;
                         k = 0;
                         for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
@@ -172,48 +170,50 @@ int main()
                             if (recv_buffer[i] == '@' && recv_buffer[i + 1] == '@' && recv_buffer[i + 2] == '@')
                             {
                                 i = i + 2;
-                                student_details[j][k] = '\0';
+                                expression[j][k] = '\0';
                                 j++;
                                 k = 0;
                             }
                             // stopping before the $$$ terminator
                             else if (recv_buffer[i] == '$' && recv_buffer[i + 1] == '$' && recv_buffer[i + 2] == '$')
                             {
-                                student_details[j][k] = '\0';
+                                expression[j][k] = '\0';
                                 break;
                             }
                             else
                             {
-                                student_details[j][k] = recv_buffer[i];
+                                expression[j][k] = recv_buffer[i];
                                 k++;
                             }
                         }
 
-                        /* **************************** ADD STUDENT RECORD ****************************** */
+                        /* **************************** DO CALCULATION ****************************** */
 
-                        r = add_student_record(student_details);
+                        r = do_calculation(expression, result);
 
                         /* ****************************** FORMULATE RESPONSE ******************************** */
 
                         switch (r)
                         {
-                        case CANNOT_OPEN_FILE:
-                            // message displayed in color red
-                            strcpy(send_buffer, "\033[31mCould not open file student_details.txt.\033[0m");
-                            break;
-                        case DUPLICATE_SERIAL:
+                        case INVALID_OPERATOR:
                             // message displayed in color yellow
-                            strcpy(send_buffer, "\033[33mDuplicate Serial no. Failed to add record.\033[0m");
+                            strcpy(send_buffer, "\033[33mUnrecognized operator. Neither +, -, * nor / was picked\033[0m");
                             break;
-                        case DUPLICATE_REGNO:
+                        case LEFT_OPERAND_NOT_A_NUMBER:
                             // message displayed in color yellow
-                            strcpy(send_buffer, "\033[33mDuplicate Registration no. Failed to add record.\033[0m");
+                            strcpy(send_buffer, "\033[33mInvalid operand. First operand was not an integer\033[0m");
                             break;
-                        case DETAILS_SAVED_SUCCESSFULLY:
+                        case RIGHT_OPERAND_NOT_A_NUMBER:
+                            // message displayed in color yellow
+                            strcpy(send_buffer, "\033[33mInvalid operand. Second operand was not an integer\033[0m");
+                            break;
+                        case CALCULATION_SUCCESSFUL:
                             // message displayed in color green
-                            strcpy(send_buffer, "\033[32mRecord added successfully.\033[0m");
+                            strcpy(send_buffer, "\033[32mThe answer is \033[0m");
+                            strcat(send_buffer, result);
                             break;
                         default:
+                            // message displayed in color red
                             strcpy(send_buffer, "\033[31mError saving record.\033[0m");
                             break;
                         }
@@ -229,7 +229,7 @@ int main()
                             exit(EXIT_FAILURE);
                         }
 
-                        puts("📤 Response sent to client");
+                        printf("📤 Response sent to client %s\n", client[fd]);
 
                         disconnect_time = time(NULL);
                         printf("✅ Client %s disconnected from the server at \033[34m%s\033[0m", client[fd], ctime(&disconnect_time));

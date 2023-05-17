@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 // function prototypes
-int getuserinput(char buffer[BUFSIZ], char operator[2], char fdigit[9], char sdigit[9]); // function to get user input and format based on application protocol
+int getuserinput(char buffer[BUFSIZ], char operator[2], char fdigit[9], char sdigit[9]);
 
 int main()
 {

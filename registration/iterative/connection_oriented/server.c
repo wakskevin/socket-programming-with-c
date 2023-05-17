@@ -179,7 +179,7 @@ int main()
             exit(EXIT_FAILURE);
         }
 
-        printf("📤 Response sent to client %s", client);
+        printf("📤 Response sent to client %s\n", client);
 
         // close client socket
         close(newsockfd);
