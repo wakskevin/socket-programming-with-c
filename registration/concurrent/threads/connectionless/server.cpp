@@ -26,8 +26,6 @@ typedef struct
 
 Response add_student_record(char student_details[4][20]);
 
-int r;
-
 int main()
 {
     int r, sockfd, newsockfd;

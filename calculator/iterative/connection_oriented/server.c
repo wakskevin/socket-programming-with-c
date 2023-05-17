@@ -116,6 +116,7 @@ int main()
             puts("⌛ Processing data...");
 
             /* ************************** EXTRACT OPERANDS AND OPERATOR ***************************** */
+            
             j = 0;
             k = 0;
             for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
