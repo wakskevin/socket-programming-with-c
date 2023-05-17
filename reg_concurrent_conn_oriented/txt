@@ -1,1 +1,0 @@
-gcc -o hello_server hello_server.c hello_svc.c -I/usr/include/tirpc -lnsl
