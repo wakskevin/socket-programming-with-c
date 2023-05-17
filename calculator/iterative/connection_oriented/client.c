@@ -120,8 +120,6 @@ int main()
     return EXIT_SUCCESS;
 }
 
-// -------------- subfunctions
-
 int getuserinput(char buffer[BUFSIZ], char operator[2], char fdigit[9], char sdigit[9])
 {
 

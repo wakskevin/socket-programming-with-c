@@ -27,7 +27,6 @@ int main()
     struct addrinfo hints, *host;
     struct sockaddr client_address;
     socklen_t clientaddr_len = sizeof client_address;
-    pid_t pid;
     time_t connect_time, disconnect_time;
 
     putchar('\n');
@@ -102,7 +101,7 @@ int main()
         connect_time = time(NULL);                                                          // get the time that the client has connected
         printf("✅ Client %s connected to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
 
-        /* ******************************** RECEIVE STUDENT DETAILS **************************** */
+        /* ******************************** RECEIVE CALCULATION INPUT **************************** */
 
         r = recv(newsockfd, recv_buffer, BUFSIZ, 0);
 
@@ -116,7 +115,7 @@ int main()
             printf("📨 Received %d bytes of data from client %s\n", r, client);
             puts("⌛ Processing data...");
 
-            /* ************************** EXTRACT STUDENT DETAILS ***************************** */
+            /* ************************** EXTRACT OPERANDS AND OPERATOR ***************************** */
             j = 0;
             k = 0;
             for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
@@ -142,7 +141,7 @@ int main()
                 }
             }
 
-            /* **************************** ADD STUDENT RECORD ****************************** */
+            /* **************************** DO CALCULATION ****************************** */
 
             r = do_calculation(expression, result);
         }
@@ -202,7 +201,6 @@ int main()
 
     return EXIT_SUCCESS;
 }
-
 
 Response do_calculation(char expression[4][20], char result[BUFSIZ])
 {

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netdb.h>
@@ -9,13 +10,15 @@
 
 typedef enum
 {
-    CANNOT_OPEN_FILE = 30,
-    DUPLICATE_SERIAL = 31,
-    DUPLICATE_REGNO = 32,
-    DETAILS_SAVED_SUCCESSFULLY = 33
+    INVALID_OPERATOR = 30,
+    LEFT_OPERAND_NOT_A_NUMBER = 31,
+    RIGHT_OPERAND_NOT_A_NUMBER = 32,
+    CALCULATION_SUCCESSFUL = 33
 } Response;
 
-Response add_student_record(char student_details[4][20]);
+Response do_calculation(char expression[4][20], char result[BUFSIZ]);
+int is_operator(char *operator);
+int is_number(char *number);
 
 int main()
 {
@@ -25,11 +28,11 @@ int main()
     int newsockfd;
     int max_connections;
     const int backlog = 10;
-    int j = 0, k = 0;
+    int j, k;
 
     char recv_buffer[BUFSIZ];
     char send_buffer[BUFSIZ];
-    char student_details[4][20];
+    char expression[4][20];
     char client[backlog][BUFSIZ]; /* storage for IPv4 connections */
 
     struct addrinfo hints, *host;
@@ -37,7 +40,6 @@ int main()
 
     fd_set mainfd, readfd;
     socklen_t clientaddr_len = sizeof client_address;
-    pid_t pid;
     time_t connect_time, disconnect_time;
 
     putchar('\n');
@@ -96,7 +98,7 @@ int main()
     max_connections = backlog;
     FD_ZERO(&mainfd);
     FD_SET(sockfd, &mainfd);
-    
+
     puts("✅ TCP server is listening...");
     puts("\n--------------------------------------------------------");
 
@@ -161,7 +163,9 @@ int main()
                         k = 0;
 
                         /* ************************** EXTRACT STUDENT DETAILS ***************************** */
-
+                        
+                        j = 0;
+                        k = 0;
                         for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
                         {
                             // remove the @@@ separators
@@ -248,70 +252,83 @@ int main()
     return EXIT_SUCCESS;
 }
 
-Response add_student_record(char student_details[4][20])
+Response do_calculation(char expression[4][20], char result[BUFSIZ])
 {
-    enum user_details
+    enum expression_parts
     {
-        SERIAL,
-        REGNO,
-        FNAME,
-        LNAME
+        FDIGIT,
+        OPERATOR,
+        SDIGIT
     };
 
-    FILE *fh;
-    char line[100];
-    char *token;
-    char delimiter[] = "            ";
+    int r;
+    float answer;
 
-    fh = fopen("student_details.txt", "a+");
-    if (fh == NULL)
-        return CANNOT_OPEN_FILE;
-
-    fseek(fh, 0, SEEK_END); // Move the file pointer to the end of the file
-
-    switch (ftell(fh))
+    r = is_operator(expression[OPERATOR]); // checks if operator provided is valid (either +, -, * or /)
+    if (r == -1)
     {
-        // Check if the file is empty
-    case 0:
-        fprintf(fh, "SERIAL         REGISTRATION           FULL NAME\n");
-        fprintf(fh, "-----------------------------------------------\n");
+        return INVALID_OPERATOR;
+    }
+
+    r = is_number(expression[FDIGIT]); // checks if the first operand is a valid integer
+    if (r == -1)
+    {
+        return LEFT_OPERAND_NOT_A_NUMBER;
+    }
+
+    r = is_number(expression[SDIGIT]); // checks if the second operand is a valid integer
+    if (r == -1)
+    {
+        return RIGHT_OPERAND_NOT_A_NUMBER;
+    }
+
+    /* *********************** perform arithmetic operation *********************** */
+
+    switch (expression[OPERATOR][0])
+    {
+    case '+':
+        answer = (atoi(expression[FDIGIT])) + (atoi(expression[SDIGIT]));
         break;
-
+    case '-':
+        answer = (atoi(expression[FDIGIT])) - (atoi(expression[SDIGIT]));
+        break;
+    case '*':
+        answer = (atoi(expression[FDIGIT])) * (atoi(expression[SDIGIT]));
+        break;
+    case '/':
+        answer = (atoi(expression[FDIGIT])) / (atoi(expression[SDIGIT]));
+        break;
     default:
-        fseek(fh, -1, SEEK_END); // Move the file pointer to the last character
-        if (fgetc(fh) != '\n')
-            fprintf(fh, "\n"); // Add a newline if the last character is not a newline
-
-        rewind(fh);
-        while (fgets(line, sizeof(line), fh) != NULL)
-        {
-            if (line[strlen(line) - 1] == '\n')
-                line[strlen(line) - 1] = '\0';
-
-            token = strtok(line, delimiter);
-            if (token != NULL)
-            {
-                if (strcmp(student_details[SERIAL], token) == 0)
-                {
-                    fclose(fh);
-                    return DUPLICATE_SERIAL;
-                }
-
-                token = strtok(NULL, delimiter); // Move to the next token (REGNO)
-                if (token != NULL && strcmp(student_details[REGNO], token) == 0)
-                {
-                    fclose(fh);
-                    return DUPLICATE_REGNO;
-                }
-            }
-        }
         break;
     }
 
-    // Write the record to the file
-    fprintf(fh, "%s            %s            %s %s\n", student_details[SERIAL], student_details[REGNO], student_details[FNAME], student_details[LNAME]);
+    snprintf(result, BUFSIZ, "\033[32m%g\033[0m", answer); // result displayed in color green
 
-    fclose(fh);
+    printf("\n%s %s %s = %s\n\n", expression[FDIGIT], expression[OPERATOR], expression[SDIGIT], result);
 
-    return DETAILS_SAVED_SUCCESSFULLY;
+    return CALCULATION_SUCCESSFUL;
+}
+
+int is_operator(char *operator)
+{
+    if (strcmp(operator, "+") == 0 || strcmp(operator, "-") == 0 || strcmp(operator, "*") == 0 || strcmp(operator, "/") == 0)
+    {
+        return (0);
+    }
+    else
+    {
+        return (-1);
+    }
+}
+
+int is_number(char *number)
+{
+    for (int i = 0; i < strlen(number); i++)
+    {
+        if (!isdigit(number[i]))
+        {
+            return (-1);
+        }
+    }
+    return (0);
 }

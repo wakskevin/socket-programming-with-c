@@ -37,7 +37,6 @@ int main()
 
     fd_set mainfd, readfd;
     socklen_t clientaddr_len = sizeof client_address;
-    pid_t pid;
     time_t connect_time, disconnect_time;
 
     putchar('\n');
