@@ -31,8 +31,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Address of remote server set successfully!");
-
     /* ************************ CREATE SOCKET *********************** */
 
     sockfd = socket(server->ai_family,
@@ -45,7 +43,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Client socket created successfully!");
+    puts("✅ Socket created");
 
     /* ******************************* CONNECT TO THE SERVER ********************************* */
 
@@ -58,7 +56,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Client socket connected to remote server successfully!");
+    puts("✅ Socket connected to remote server");
     puts("\n--------------------------------------------------------");
 
     /* ******************************* GET USER INPUT *********************************** */

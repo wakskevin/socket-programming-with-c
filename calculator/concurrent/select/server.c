@@ -57,8 +57,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Configured host server address details successfully!");
-
     /* ************************ CREATE SOCKET TO BIND TO HOST SERVER *********************** */
 
     sockfd = socket(host->ai_family, host->ai_socktype, host->ai_protocol);
@@ -69,7 +67,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Host server socket created successfully!");
+    puts("✅ Socket created");
 
     /* ******************************* BIND TO SOCKET ************************************* */
 
@@ -81,7 +79,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Socket bound to host successfully!");
+    puts("✅ Socket bound to address");
 
     /* *************************** LISTEN TO INCOMING CONNECTIONS ************************* */
 
@@ -98,10 +96,11 @@ int main()
     FD_SET(sockfd, &mainfd);
 
     puts("✅ TCP server is listening...");
-    puts("\n--------------------------------------------------------");
+    puts("\n--------------------------------------------------------\n");
 
     while (1)
     {
+        printf("\n🔍 Waiting for activity on connections...\n");
 
         readfd = mainfd;
 
@@ -129,16 +128,21 @@ int main()
                         exit(EXIT_FAILURE);
                     }
 
+                    puts("Accepting incoming connection");
+
                     FD_SET(newsockfd, &mainfd); // add new client socket to the master list
+                    puts("Added socket to file descriptor list");
 
                     getnameinfo(&client_address, clientaddr_len, client[newsockfd], BUFSIZ, 0, 0, NI_NUMERICHOST); // get client ip address
                     connect_time = time(NULL);                                                                     // get the time that the client has connected
 
-                    printf("✅ Client %s connected to the server at \033[34m%s\033[0m", client[newsockfd], ctime(&connect_time));
+                    printf("✅ Client %s connected to the server at \033[34m%s\033[0m\n", client[newsockfd], ctime(&connect_time));
                     break;
                 }
                 else // if an existing client
                 {
+                    printf("\n🔗 Connection activity detected on client %s\n", client[fd]);
+
                     /* ******************************** RECEIVE CALCULATION INPUT **************************** */
 
                     r = recv(fd, recv_buffer, BUFSIZ, 0);
@@ -147,6 +151,8 @@ int main()
                     {
                         close(fd);           // close client socket
                         FD_CLR(fd, &mainfd); // reset in the list
+                        puts("Removed socket from socket descriptors list");
+
                         disconnect_time = time(NULL);
                         printf("✅ Client %s disconnected from the server at \033[34m%s\033[0m", client[fd], ctime(&disconnect_time));
                         break;
@@ -186,6 +192,8 @@ int main()
                                 k++;
                             }
                         }
+
+                        printf("✉️ Extracted operands and operator from the received data.\n");
 
                         /* **************************** DO CALCULATION ****************************** */
 

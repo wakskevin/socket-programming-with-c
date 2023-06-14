@@ -90,6 +90,7 @@ void get_webpage()
         freeaddrinfo(webserver); // free allocated address memory
         exit(0);
     }
+    puts("Socket created");
 
     /* ******************************* connect to the server ********************************* */
 
@@ -101,6 +102,7 @@ void get_webpage()
         puts("⛔ ERROR! Failed to connect to web server. Exiting program...\n");
         close_resources(webserver, sockfd);
     }
+    puts("Socket connected to remote server");
 
     /* ************************* send HTTP GET request ******************************* */
 
@@ -110,6 +112,7 @@ void get_webpage()
         puts("⛔ ERROR! Failed to send GET request. Exiting program...\n");
         close_resources(webserver, sockfd);
     }
+    puts("HTTP GET request sent");
 
     /* *************************** receive response from server ********************************* */
 

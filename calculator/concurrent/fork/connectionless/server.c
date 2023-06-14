@@ -48,8 +48,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Configured host server address details successfully!");
-
     /* ************************ CREATE SOCKET TO BIND TO HOST SERVER *********************** */
 
     sockfd = socket(host->ai_family, host->ai_socktype, host->ai_protocol);
@@ -60,7 +58,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Host server socket created successfully!");
+    puts("✅ Socket created");
 
     /* ******************************* BIND TO SOCKET ************************************* */
 
@@ -72,8 +70,8 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Socket bound to host successfully!");
-    puts("✅ UDP server is waiting...");
+    puts("✅ Socket bound to address");
+    puts("✅ UDP server is set up...");
     puts("\n--------------------------------------------------------");
 
     while (1)
@@ -97,6 +95,9 @@ int main()
             {
                 getnameinfo(&client_address, clientaddr_len, client, BUFSIZ, 0, 0, NI_NUMERICHOST); // get client ip
                 connect_time = time(NULL);                                                          // get client connecting time
+
+
+                puts("Incoming data.. forking new process");
                 printf("✅ Client %s sent data to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
 
                 recv_buffer[r] = '\0'; // terminate the incoming string
@@ -174,6 +175,7 @@ int main()
 
             disconnect_time = time(NULL);
             printf("📤 Response sent to client %s at \033[34m%s\033[0m", client, ctime(&disconnect_time));
+             puts("\n Forked process ended");
             puts("\n--------------------------------------------------------");
             exit(EXIT_SUCCESS);
         }

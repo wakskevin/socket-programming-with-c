@@ -46,8 +46,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Configured host server address details successfully!");
-
     /* ************************ CREATE SOCKET TO BIND TO HOST SERVER *********************** */
 
     sockfd = socket(host->ai_family, host->ai_socktype, host->ai_protocol);
@@ -58,7 +56,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Host server socket created successfully!");
+    puts("✅ Socket created");
 
     /* ******************************* BIND TO SOCKET ************************************* */
 
@@ -70,7 +68,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Socket bound to host successfully!");
+    puts("✅ Socket bound to address");
 
     /* *************************** LISTEN TO INCOMING CONNECTIONS ************************* */
 

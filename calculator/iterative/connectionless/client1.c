@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -19,11 +20,11 @@ int main()
 
     /* ***************************** CONFIGURE REMOTE ADDRESS ********************************* */
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;       // IPv4 connection
-    hints.ai_socktype = SOCK_STREAM; // TCP, streaming
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET;      // IPv4 connection
+    hints.ai_socktype = SOCK_DGRAM; // UDP connection
 
-    r = getaddrinfo(0, "8080", &hints, &server);
+    r = getaddrinfo("127.0.0.1", "8080", &hints, &server);
 
     if (r != 0)
     {
@@ -31,35 +32,18 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Address of remote server set successfully!");
-
     /* ************************ CREATE SOCKET *********************** */
 
     sockfd = socket(server->ai_family,
                     server->ai_socktype,
                     server->ai_protocol);
-
     if (sockfd == -1)
     {
         puts("⛔ Failed to create client socket. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Client socket created successfully!");
-
-    /* ******************************* CONNECT TO THE SERVER ********************************* */
-
-    r = connect(sockfd,
-                server->ai_addr,
-                server->ai_addrlen);
-    if (r == -1)
-    {
-        puts("⛔ Client socket failed to connect to the server. Exiting client program...");
-        exit(EXIT_FAILURE);
-    }
-
-    puts("✅ Client socket connected to remote server successfully!");
-    puts("\n--------------------------------------------------------");
+    puts("✅ Socket created");
 
     /* ******************************* GET USER INPUT *********************************** */
 
@@ -83,14 +67,15 @@ int main()
     strcat(send_buffer, "$$$"); // finish with the terminator indicator/
 
     putchar('\n');
+    // printf("%s\n", send_buffer);
 
     /* ************************* SEND STRING ******************************* */
 
-    r = send(sockfd, send_buffer, strlen(send_buffer), 0);
+    r = sendto(sockfd, send_buffer, strlen(send_buffer), 0, server->ai_addr, server->ai_addrlen);
 
-    if (r < 1)
+    if (r == -1)
     {
-        printf("⛔ Failed to send mesage. Exiting program...\n\n");
+        puts("⛔ Failed to send mesage. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
@@ -98,9 +83,9 @@ int main()
 
     /* *************************** RECEIVE SERVER RESPONSE ********************************* */
 
-    r = recv(sockfd, recv_buffer, BUFSIZ, 0);
+    r = recvfrom(sockfd, recv_buffer, BUFSIZ, 0, server->ai_addr, &server->ai_addrlen);
 
-    if (r < 1)
+    if (r == -1)
     {
         puts("⛔ Failed! Received 0 bytes of data. Exiting client program...");
         exit(EXIT_FAILURE);

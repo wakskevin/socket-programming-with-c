@@ -47,8 +47,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Configured host server address details successfully!");
-
     /* ************************ CREATE SOCKET TO BIND TO HOST SERVER *********************** */
 
     sockfd = socket(host->ai_family, host->ai_socktype, host->ai_protocol);
@@ -59,7 +57,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Host server socket created successfully!");
+    puts("✅ Socket created");
 
     /* ******************************* BIND TO SOCKET ************************************* */
 
@@ -71,7 +69,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Socket bound to host successfully!");
+    puts("✅ Socket bound to address");
 
     /* *************************** LISTEN TO INCOMING CONNECTIONS ************************* */
 
@@ -97,10 +95,7 @@ int main()
             puts("⛔ Server Malfunction! Cannot accept incoming connections! Exiting server program...");
             exit(EXIT_FAILURE);
         }
-
-        getnameinfo(&client_address, clientaddr_len, client, BUFSIZ, 0, 0, NI_NUMERICHOST); // get client ip address
-        connect_time = time(NULL);
-        printf("✅ Client %s is connected to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
+        puts("\n Accepting Incoming connection request.. forking new process");
 
         /* ******************************** FORK NEW PROCESS TO HANDLE CONNECTION **************************** */
 
@@ -113,6 +108,10 @@ int main()
         }
         else if (pid == 0) // This is the child process
         {
+
+            getnameinfo(&client_address, clientaddr_len, client, BUFSIZ, 0, 0, NI_NUMERICHOST); // get client ip address
+            connect_time = time(NULL);
+            printf("✅ Client %s is connected to the server at \033[34m%s\033[0m\n", client, ctime(&connect_time));
 
             // close resources which the child process won't require at all.
             freeaddrinfo(host);
@@ -133,7 +132,7 @@ int main()
                 puts("⌛ Processing data...");
 
                 /* ************************** EXTRACT OPERANDS AND OPERATOR ***************************** */
-                
+
                 j = 0;
                 k = 0;
                 for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
@@ -206,6 +205,8 @@ int main()
             // close client socket
             close(newsockfd);
             disconnect_time = time(NULL);
+
+            puts("\n Forked process ended");
             printf("✅ Client %s disconnected from the server at \033[34m%s\033[0m", client, ctime(&disconnect_time));
 
             puts("\n--------------------------------------------------------");
