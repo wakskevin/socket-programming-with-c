@@ -17,7 +17,7 @@ int main()
 
     putchar('\n');
 
-    /* ***************************** CONFIGURE REMOTE ADDRESS ********************************* */
+    // configure remote address
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;       // IPv4 connection
@@ -27,26 +27,26 @@ int main()
 
     if (r != 0)
     {
-        puts("⛔ Failed to set address of remote server. Exiting client program...");
+        puts("❌ Failed to set address of remote server. Exiting client program...");
         exit(EXIT_FAILURE);
     }
     
-    puts("✅ Address of remote server set successfully!");
+    puts("Address of remote server set successfully!");
 
-    /* ************************ CREATE SOCKET *********************** */
+    // create socket
 
     sockfd = socket(server->ai_family,
                     server->ai_socktype,
                     server->ai_protocol);
     if (sockfd == -1)
     {
-        puts("⛔ Failed to create client socket. Exiting client program...");
+        puts("❌ Failed to create client socket. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Client socket created successfully!");
+    puts("Client socket created successfully!");
 
-    /* ******************************* CONNECT TO THE SERVER ********************************* */
+    // connect to the server
 
     r = connect(sockfd,
                 server->ai_addr,
@@ -54,26 +54,26 @@ int main()
 
     if (r == -1)
     {
-        puts("⛔ Client socket failed to connect to the server. Exiting client program...");
+        puts("❌ Client socket failed to connect to the server. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Client socket connected to remote server successfully!");
+    puts("Client socket connected to remote server successfully!");
     puts("\n--------------------------------------------------------");
 
-    /* ******************************* GET USER INPUT *********************************** */
+    // get user input
 
     r = getuserinput(send_buffer, serial, regno, fname, lname);
 
     if (r == -1)
     {
-        puts("⛔ Failed to get user input. Exiting client program...");
+        puts("❌ Failed to get user input. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ User input got successfully!");
+    puts("User input got successfully!");
 
-    /* ******************************* FORMAT INPUT INTO STRING *********************************** */
+    // format input into a string
 
     strcpy(send_buffer, serial);
     strcat(send_buffer, "@@@"); // separator indicator
@@ -85,27 +85,26 @@ int main()
     strcat(send_buffer, "$$$"); // finish with the terminator indicator
 
     putchar('\n');
-    // printf("%s\n", send_buffer);
 
-    /* ************************* SEND STRING ******************************* */
+    // send string
 
     r = send(sockfd, send_buffer, strlen(send_buffer), 0);
 
     if (r < 1)
     {
-        puts("⛔ Failed to send mesage. Exiting client program...");
+        puts("❌ Failed to send mesage. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
     puts("📤 Student details sent to remote server successfully!");
 
-    /* *************************** RECEIVE SERVER RESPONSE ********************************* */
+    // receive response
 
     r = recv(sockfd, recv_buffer, BUFSIZ, 0);
 
     if (r < 1)
     {
-        puts("⛔ Failed! Received 0 bytes of data. Exiting client program...");
+        puts("❌ Failed! Received 0 bytes of data. Exiting client program...");
         exit(EXIT_FAILURE);
     }
 
@@ -114,7 +113,7 @@ int main()
     printf("Server responded with '%s'.\n", recv_buffer);
     puts("\n--------------------------------------------------------");
 
-    /* ******************************** CLOSE RESOURCES ************************************ */
+    // close up
 
     freeaddrinfo(server); // free allocated address memory
     close(sockfd);        // close socket

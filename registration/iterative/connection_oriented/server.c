@@ -28,7 +28,7 @@ int main()
 
     putchar('\n');
 
-    /* ************************** CONFIGURE SERVER HOST ADDRESS ***************************** */
+    // Configure addresses
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;       // IPv4 connection
@@ -39,72 +39,71 @@ int main()
 
     if (r != 0)
     {
-        puts("⛔ Server Malfunction! Failed to configure host address details. Exiting program...");
+        puts("❌ Server Malfunction! Failed to configure host address details. Exiting program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Configured host server address details successfully!");
+    puts("Configured host server address details successfully!");
 
-    /* ************************ CREATE SOCKET TO BIND TO HOST SERVER *********************** */
+    // Create socket
 
     sockfd = socket(host->ai_family, host->ai_socktype, host->ai_protocol);
 
     if (sockfd == -1)
     {
-        puts("⛔ Server Malfunction! Failed to create host server socket. Exiting program...");
+        puts("❌ Server Malfunction! Failed to create host server socket. Exiting program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Host server socket created successfully!");
+    puts("Host server socket created successfully!");
 
-    /* ******************************* BIND TO SOCKET ************************************* */
+    // Bind socket to address
 
     r = bind(sockfd, host->ai_addr, host->ai_addrlen);
 
     if (r == -1)
     {
-        puts("⛔ Server Malfunction! Failed to bind host to socket. Exiting server program...");
+        puts("❌ Server Malfunction! Failed to bind host to socket. Exiting server program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Socket bound to host successfully!");
+    puts("Socket bound to address successfully!");
 
-    /* *************************** LISTEN TO INCOMING CONNECTIONS ************************* */
+    // listen to incoming connections
 
     r = listen(sockfd, 3); // number of pending connections that can wait in the queue is 3.
 
     if (r == -1)
     {
-        puts("⛔ Server Malfunction! Failed to listen to incoming connections Exiting server program...");
+        puts("❌ Server Malfunction! Failed to listen to incoming connections Exiting server program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ TCP server is listening...");
-    puts("\n--------------------------------------------------------");
+    puts("TCP server is listening...\n");
 
     while (1)
     {
-        /* ************************ ACCEPT CONNECTION REQUESTS *********************** */
+        // accept incoming connections
 
         newsockfd = accept(sockfd, &client_address, &clientaddr_len);
 
         if (newsockfd == -1)
         {
-            puts("⛔ Server Malfunction! Cannot accept incoming connections! Exiting server program...");
+            puts("❌ Server Malfunction! Cannot accept incoming connections! Exiting server program...");
             exit(EXIT_FAILURE);
         }
 
         getnameinfo(&client_address, clientaddr_len, client, BUFSIZ, 0, 0, NI_NUMERICHOST); // get client ip address
         connect_time = time(NULL);                                                          // get the time that the client has connected
-        printf("✅ Client %s connected to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
+        printf("Client %s connected to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
 
-        /* ******************************** RECEIVE STUDENT DETAILS **************************** */
+        // receive student details
 
         r = recv(newsockfd, recv_buffer, BUFSIZ, 0);
 
         if (r < 1)
         {
-            printf("⛔ Received 0 bytes of data from client %s\n", client);
+            printf("❌ Received 0 bytes of data from client %s\n", client);
         }
         else
         {
@@ -112,7 +111,8 @@ int main()
             printf("📨 Received %d bytes of data from client %s\n", r, client);
             puts("⌛ Processing data...");
 
-            /* ************************** EXTRACT STUDENT DETAILS ***************************** */
+            // extract student details
+
             j = 0;
             k = 0;
             for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
@@ -138,12 +138,12 @@ int main()
                 }
             }
 
-            /* **************************** ADD STUDENT RECORD ****************************** */
+            // add student records
 
             r = add_student_record(student_details);
         }
 
-        /* ****************************** FORMULATE RESPONSE ******************************** */
+        // formulate response
 
         switch (r)
         {
@@ -170,12 +170,12 @@ int main()
         }
         printf("...%s\n", send_buffer);
 
-        /* ************************* SEND RESPONSE BACK TO CLIENT ************************* */
+        // send response back to client
 
         r = send(newsockfd, send_buffer, strlen(send_buffer), 0);
         if (r < 1)
         {
-            printf("⛔ Server Malfunction! Failed to send response back to the client %s", client);
+            printf("❌ Server Malfunction! Failed to send response back to the client %s", client);
             exit(EXIT_FAILURE);
         }
 
@@ -185,12 +185,12 @@ int main()
         close(newsockfd);
 
         disconnect_time = time(NULL);
-        printf("✅ Client %s disconnected from the server at \033[34m%s\033[0m", client, ctime(&disconnect_time));
+        printf("Client %s disconnected from the server at \033[34m%s\033[0m", client, ctime(&disconnect_time));
 
         puts("\n--------------------------------------------------------");
     }
 
-    /* *********************************** CLOSE UP **************************************** */
+    // close up
 
     freeaddrinfo(host);
     close(sockfd);

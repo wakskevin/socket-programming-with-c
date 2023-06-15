@@ -28,7 +28,7 @@ int main()
 
     putchar('\n');
 
-    /* ************************** CONFIGURE SERVER HOST ADDRESS ***************************** */
+    // configure remote address
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;      // IPv4 connection
@@ -39,59 +39,59 @@ int main()
 
     if (r != 0)
     {
-        puts("⛔ Server Malfunction! Failed to configure host address details. Exiting program...");
+        puts("❌ Server Malfunction! Failed to configure host address details. Exiting program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Configured host server address details successfully!");
+    puts("Configured host server address details successfully!");
 
-    /* ************************ CREATE SOCKET TO BIND TO HOST SERVER *********************** */
+    // create socket
 
     sockfd = socket(host->ai_family, host->ai_socktype, host->ai_protocol);
 
     if (sockfd == -1)
     {
-        puts("⛔ Server Malfunction! Failed to create host server socket. Exiting program...");
+        puts("❌ Server Malfunction! Failed to create host server socket. Exiting program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Host server socket created successfully!");
+    puts("Host server socket created successfully!");
 
-    /* ******************************* BIND TO SOCKET ************************************* */
+    // bind socket to address
 
     r = bind(sockfd, host->ai_addr, host->ai_addrlen);
 
     if (r == -1)
     {
-        puts("⛔ Server Malfunction! Failed to bind host to socket. Exiting server program...");
+        puts("❌ Server Malfunction! Failed to bind host to socket. Exiting server program...");
         exit(EXIT_FAILURE);
     }
 
-    puts("✅ Socket bound to host successfully!");
-    puts("✅ UDP server is waiting...");
-    puts("\n--------------------------------------------------------");
+    puts("Socket bound to address successfully!");
+    puts("UDP server is waiting...");
 
     while (1)
     {
-        /* ******************************** RECEIVE STUDENT DETAILS **************************** */
+        // receive student details
 
         r = recvfrom(sockfd, recv_buffer, BUFSIZ, 0, &client_address, &clientaddr_len);
 
         if (r < 1)
         {
-            puts("⛔ Received 0 bytes of data");
+            puts("❌ Received 0 bytes of data");
         }
         else
         {
             getnameinfo(&client_address, clientaddr_len, client, BUFSIZ,0,0,NI_NUMERICHOST); // get client ip
             connect_time = time(NULL); // get client connecting time
-            printf("✅ Client %s sent data to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
+            printf("Client %s sent data to the server at \033[34m%s\033[0m", client, ctime(&connect_time));
             
             recv_buffer[r] = '\0'; // terminate the incoming string
             printf("📨 Received %d bytes of data\n", r);
             puts("⌛ Processing data...");
 
-            /* ************************** EXTRACT STUDENT DETAILS ***************************** */
+            // extract student details
+
             j = 0;
             k = 0;
             for (int i = 0; i < (strlen(recv_buffer) - 1); i++)
@@ -117,12 +117,12 @@ int main()
                 }
             }
 
-            /* **************************** ADD STUDENT RECORD ****************************** */
+            // add record
 
             r = add_student_record(student_details);
         }
 
-        /* ****************************** FORMULATE RESPONSE ******************************** */
+        // formulate response
 
         switch (r)
         {
@@ -149,12 +149,12 @@ int main()
         }
         printf("...%s\n", send_buffer);
 
-        /* ************************* SEND RESPONSE BACK TO CLIENT ************************* */
+        // send response back to client
 
         r = sendto(sockfd, send_buffer, strlen(send_buffer), 0, &client_address, clientaddr_len);
         if (r < 1)
         {
-            puts("⛔ Server Malfunction! Failed to send response back to the client");
+            puts("❌ Server Malfunction! Failed to send response back to the client");
             exit(EXIT_FAILURE);
         }
 
@@ -163,7 +163,7 @@ int main()
         puts("\n--------------------------------------------------------");
     }
 
-    /* *********************************** CLOSE UP **************************************** */
+    // close up
 
     freeaddrinfo(host);
     close(sockfd);
